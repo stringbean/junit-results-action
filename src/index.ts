@@ -29,7 +29,7 @@ async function run() {
 
   const suites = await loader.loadFiles(files);
 
-  const [summaryFile, testSummary] = await generateSummaryArtifact(suites);
+  const [summaryFile, testSummary] = await generateSummaryArtifact(tmpDir, suites);
   await artifactClient.uploadArtifact(`test-summary-${context.job}.json`, [summaryFile], tmpDir);
 
   const generator = new ReportGenerator();
@@ -38,7 +38,10 @@ async function run() {
   await artifactClient.uploadArtifact(`test-report-${context.job}.html`, [reportFile], tmpDir);
 }
 
-async function generateSummaryArtifact(suites: TestSuite[]): Promise<[string, TestSummary]> {
+async function generateSummaryArtifact(
+  tmpDir: string,
+  suites: TestSuite[],
+): Promise<[string, TestSummary]> {
   const summarise = (acc: TestSummary, suite: TestSuite) => {
     return {
       duration: acc.duration + suite.durationSec,
@@ -62,11 +65,7 @@ async function generateSummaryArtifact(suites: TestSuite[]): Promise<[string, Te
     tests: testSummary,
   };
 
-  // create temp file
-  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'junit-results-action-'));
-
   const summaryFile = path.join(tmpDir, 'test-summary.json');
-
   await fsPromises.writeFile(summaryFile, JSON.stringify(summary));
 
   return [summaryFile, testSummary];
