@@ -19,6 +19,6 @@ jobs:
 
       - uses: mheap/build-and-tag-action@add-additional-files
         with:
-          additional_files: dist/report.ejs
+          additional_files: report.ejs
         env:
           GITHUB_TOKEN: ${{github.token}}
