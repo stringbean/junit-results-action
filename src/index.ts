@@ -10,10 +10,14 @@ import * as path from 'path';
 import * as os from 'os';
 import { context } from '@actions/github';
 import JUnitLoader from './JUnitLoader';
+import { ReportGenerator } from './ReportGenerator';
 
 async function run() {
   const fileGlob: Globber = await glob.create(core.getInput('files', { required: true }));
   const storeSummary = core.getBooleanInput('store-summary');
+
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'junit-results-action-'));
+  const artifactClient = artifact.create();
 
   const files: string[] = await fileGlob.glob();
 
@@ -25,19 +29,33 @@ async function run() {
 
   const suites = await loader.loadFiles(files);
 
-  await generateSummaryArtifact(suites);
+  const [summaryFile, testSummary] = await generateSummaryArtifact(suites);
+  await artifactClient.uploadArtifact(`test-summary-${context.job}.json`, [summaryFile], tmpDir);
+
+  const generator = new ReportGenerator();
+
+  const reportFile = await generator.generateReport(tmpDir, suites, testSummary);
+  await artifactClient.uploadArtifact(`test-report-${context.job}.html`, [reportFile], tmpDir);
 }
 
-async function generateSummaryArtifact(suites: TestSuite[]) {
+async function generateSummaryArtifact(suites: TestSuite[]): Promise<[string, TestSummary]> {
   const summarise = (acc: TestSummary, suite: TestSuite) => {
     return {
+      duration: acc.duration + suite.durationSec,
       passed: acc.passed + suite.succeeded,
       failed: acc.failed + suite.errors,
       skipped: acc.skipped + suite.skipped,
+      tests: acc.tests + suite.tests,
     };
   };
 
-  const testSummary = suites.reduce(summarise, { passed: 0, failed: 0, skipped: 0 });
+  const testSummary = suites.reduce(summarise, {
+    duration: 0,
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    tests: 0,
+  });
 
   const summary = {
     name: 'TODO',
@@ -51,9 +69,7 @@ async function generateSummaryArtifact(suites: TestSuite[]) {
 
   await fsPromises.writeFile(summaryFile, JSON.stringify(summary));
 
-  const client = artifact.create();
-
-  await client.uploadArtifact(`test-summary-${context.job}.json`, [summaryFile], tmpDir);
+  return [summaryFile, testSummary];
 }
 
 run().catch((error) => {

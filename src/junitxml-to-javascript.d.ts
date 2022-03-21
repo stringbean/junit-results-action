@@ -2,9 +2,10 @@ declare module 'junitxml-to-javascript' {
   export default Parser;
 
   class Parser {
-    constructor(opts: ParseOpts = {});
+    constructor(opts: ParseOpts);
 
-    parseXMLFile(path: string, encoding: string = 'utf8'): Promise<Report>;
+    parseXMLFile(path: string, encoding): Promise<Report>;
+
     parseXmlString(input: string): Promise<Report>;
   }
 
@@ -20,11 +21,21 @@ declare module 'junitxml-to-javascript' {
 
   export class TestSuite {
     name: string;
-    timestamp: Date;
 
-    succeeded: number;
+    timestamp: Date;
+    durationSec: number;
+
     tests: number;
+    succeeded: number;
     errors: number;
     skipped: number;
+
+    testCases: TestCase[];
+  }
+
+  export class TestCase {
+    name: string;
+    result: string;
+    duration: number;
   }
 }

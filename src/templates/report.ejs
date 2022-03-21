@@ -1,0 +1,120 @@
+<html>
+<head>
+    <title>JUnit Report</title>
+
+    <style>
+        table {
+            width: 100%;
+        }
+
+        tr.total {
+            font-weight: bold;
+        }
+
+        td.count,
+        td.duration,
+        td.status {
+            width: 4em;
+            text-align: right;
+        }
+
+        td.duration {
+            width: 6em;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        table.summary .suite {
+            font-family: monospace;
+        }
+
+        .status .pass {
+            color: #008b00;
+        }
+
+        .status .fail {
+            color: #8b0000;
+        }
+    </style>
+</head>
+
+<body>
+<h2 id="summary">Summary</h2>
+
+
+<table class="summary">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Duration (s)</th>
+        <th>Pass</th>
+        <th>Fail</th>
+        <th>Skip</th>
+        <th>Total</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr class="total">
+        <td>TOTAL</td>
+        <td class="duration"><%= summary.duration.toFixed(2) %></td>
+        <td class="count"><%= summary.passed %></td>
+        <td class="count"><%= summary.failed %></td>
+        <td class="count"><%= summary.skipped %></td>
+        <td class="count"><%= summary.tests %></td>
+    </tr>
+
+    <% suites.forEach(function(suite) { %>
+        <tr>
+            <td class="suite"><a href="#suite_<%= suite.name %>"><%= suite.name %></a></td>
+            <td class="duration"><%= suite.durationSec.toFixed(2) %></td>
+            <td class="count"><%= suite.succeeded %></td>
+            <td class="count"><%= suite.errors %></td>
+            <td class="count"><%= suite.skipped %></td>
+            <td class="count"><%= suite.tests %></td>
+        </tr>
+    <% }); %>
+    </tbody>
+</table>
+
+<h2>Suites</h2>
+
+<% suites.forEach(function(suite) { %>
+
+    <h3 id="suite_<%= suite.name %>"><%= suite.name %></h3>
+
+    <p><a href="#summary">Top</a></p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Duration (s)</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <% suite.testCases.forEach(function(test) { %>
+            <tr>
+                <td><%= test.name %></td>
+                <td class="duration"><%= test.duration %></td>
+                <td class="status">
+                    <% if (test.result === "succeeded") { %>
+                        <span class="pass">Passed</span>
+                    <% } else if (test.result === "failed") { %>
+                        <span class="fail">Failed</span>
+                    <% } else { %>
+                        <%= test.result %>
+                    <% } %>
+                </td>
+            </tr>
+        <% }); %>
+        </tbody>
+    </table>
+<% }); %>
+
+</body>
+</html>
