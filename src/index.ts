@@ -9,6 +9,9 @@ import { promises as fsPromises } from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';
+import {context} from "@actions/github";
+
+
 
 const junitParser = new Parser();
 
@@ -64,7 +67,7 @@ async function generateSummaryArtifact(suites: TestSuite[]) {
 
   const client = artifact.create();
 
-  await client.uploadArtifact('test-summary.json', [summaryFile], tmpDir);
+  await client.uploadArtifact(`test-summary-${context.job}.json`, [summaryFile], tmpDir);
 }
 
 run().catch((error) => {
