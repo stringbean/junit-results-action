@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
 import * as glob from '@actions/glob';
-import * as artifact from '@actions/artifact';
 import { Globber } from '@actions/glob';
-import Parser, { TestSuite } from 'junitxml-to-javascript';
+import * as artifact from '@actions/artifact';
+import { TestSuite } from 'junitxml-to-javascript';
 import { TestSummary } from './TestSummary';
 
 import { promises as fsPromises } from 'fs';
@@ -10,8 +10,6 @@ import * as path from 'path';
 import * as os from 'os';
 import { context } from '@actions/github';
 import JUnitLoader from './JUnitLoader';
-
-const junitParser = new Parser();
 
 async function run() {
   const fileGlob: Globber = await glob.create(core.getInput('files', { required: true }));
