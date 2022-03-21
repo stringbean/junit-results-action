@@ -2,9 +2,9 @@ declare module 'junitxml-to-javascript' {
   export default Parser;
 
   class Parser {
-    constructor(opts: ParseOpts);
+    constructor(opts?: ParseOpts);
 
-    parseXMLFile(path: string, encoding): Promise<Report>;
+    parseXMLFile(path: string, encoding?: string): Promise<Report>;
 
     parseXmlString(input: string): Promise<Report>;
   }
