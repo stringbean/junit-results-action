@@ -10,7 +10,7 @@ export default class JUnitLoader {
   async loadFiles(paths: string[]): Promise<TestSuite[]> {
     console.log('our parser?', this.parser)
 
-    const suiteResults = await Promise.all(paths.map(this.loadFile));
+    const suiteResults = await Promise.all(paths.map((path) => this.loadFile(path)));
 
     return suiteResults.flat();
   }
