@@ -6,6 +6,10 @@ inputs:
   files:
     description: Glob pattern to match JUnit files
     required: true
+  store-summary:
+    description: If true then upload an artifact with a summary of the results
+    required: false
+    default: 'false'
 
 runs:
   using: node16
