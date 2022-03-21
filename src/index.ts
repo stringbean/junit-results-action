@@ -25,6 +25,10 @@ async function parseReport(path: string) {
 
   console.log('found: ' + parsed.testsuites.length + ' suites');
 
+  parsed.testsuites.forEach((suite, i) => {
+    console.log(`  suite[${i}]: ${suite.succeeded} pass, ${suite.errors} failed, ${suite.skipped} skipped`)
+  })
+
 }
 
 run().catch((error) => {
