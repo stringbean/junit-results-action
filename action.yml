@@ -1,0 +1,12 @@
+name: Junit Results
+description: Parse JUnit results
+author: Michael Stringer
+
+inputs:
+  files:
+    description: Glob pattern to match JUnit files
+    required: true
+
+runs:
+  using: node16
+  main: dist/index.js
