@@ -8,10 +8,8 @@ import { TestSummary } from './TestSummary';
 import { promises as fsPromises } from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import * as fs from 'fs';
-import {context} from "@actions/github";
-
-
+import { context } from '@actions/github';
+import JUnitLoader from './JUnitLoader';
 
 const junitParser = new Parser();
 
@@ -25,21 +23,11 @@ async function run() {
 
   // TODO iterate
 
-  await parseReport(files[0]);
-}
+  const loader = new JUnitLoader();
 
-async function parseReport(path: string) {
-  const parsed = await junitParser.parseXMLFile(path);
+  const suites = await loader.loadFiles(files);
 
-  console.log('found: ' + parsed.testsuites.length + ' suites');
-
-  parsed.testsuites.forEach((suite, i) => {
-    console.log(
-      `  suite[${i}]: ${suite.succeeded} pass, ${suite.errors} failed, ${suite.skipped} skipped`,
-    );
-  });
-
-  await generateSummaryArtifact(parsed.testsuites);
+  await generateSummaryArtifact(suites);
 }
 
 async function generateSummaryArtifact(suites: TestSuite[]) {
