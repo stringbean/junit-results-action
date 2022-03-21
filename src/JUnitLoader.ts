@@ -1,7 +1,7 @@
 import Parser, { TestSuite } from 'junitxml-to-javascript';
 
 export default class JUnitLoader {
-  private parser: Parser;
+  private readonly parser: Parser;
 
   constructor() {
     this.parser = new Parser();

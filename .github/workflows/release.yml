@@ -17,6 +17,8 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - uses: JasonEtco/build-and-tag-action@v1
+      - uses: mheap/build-and-tag-action@add-additional-files
+        with:
+          additional_files: dist/report.ejs
         env:
           GITHUB_TOKEN: ${{github.token}}
