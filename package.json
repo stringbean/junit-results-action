@@ -11,6 +11,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
+    "@actions/artifact": "^1.0.0",
     "@actions/core": "^1.6.0",
     "@actions/glob": "^0.2.1",
     "junitxml-to-javascript": "^1.1.4"
