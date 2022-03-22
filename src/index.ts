@@ -30,7 +30,7 @@ async function run() {
   const suites = await loader.loadFiles(files);
 
   const [summaryFile, testSummary] = await generateSummaryArtifact(tmpDir, suites);
-  await artifactClient.uploadArtifact(`test-summary-${context.job}.json`, [summaryFile], tmpDir);
+  await artifactClient.uploadArtifact(`test-summaries/${context.job}.json`, [summaryFile], tmpDir);
 
   const generator = new ReportGenerator();
 
