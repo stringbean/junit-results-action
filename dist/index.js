@@ -19508,7 +19508,7 @@ async function run() {
     const loader = new JUnitLoader();
     const suites = await loader.loadFiles(files);
     const [summaryFile, testSummary] = await generateSummaryArtifact(tmpDir, suites);
-    await artifactClient.uploadArtifact(`test-summaries/${github.context.job}.json`, [summaryFile], tmpDir);
+    await artifactClient.uploadArtifact(`test-summaries-${github.context.job}.json`, [summaryFile], tmpDir);
     const generator = new ReportGenerator();
     const reportFile = await generator.generateReport(tmpDir, suites, testSummary);
     await artifactClient.uploadArtifact(`test-report-${github.context.job}.html`, [reportFile], tmpDir);
