@@ -2,73 +2,49 @@ import * as core from '@actions/core';
 import * as glob from '@actions/glob';
 import { Globber } from '@actions/glob';
 import * as artifact from '@actions/artifact';
-import { TestSuite } from 'junitxml-to-javascript';
-import { TestSummary } from './TestSummary';
 
 import { promises as fsPromises } from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { context } from '@actions/github';
 import JUnitLoader from './JUnitLoader';
-import { ReportGenerator } from './ReportGenerator';
+import { HtmlReportGenerator } from './HtmlReportGenerator';
+import { ProjectReportGenerator } from './ProjectReportGenerator';
+
+const JUNIT_LOADER = new JUnitLoader();
+const REPORT_GENERATOR = new ProjectReportGenerator();
+const HTML_REPORT_GENERATOR = new HtmlReportGenerator();
 
 async function run() {
   const fileGlob: Globber = await glob.create(core.getInput('files', { required: true }));
-  const storeSummary = core.getBooleanInput('store-summary');
+  const uploadResults = core.getBooleanInput('upload-results');
+  const artifactName = core.getInput('artifact-name');
 
   const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'junit-results-action-'));
-  const artifactClient = artifact.create();
 
-  const files: string[] = await fileGlob.glob();
+  const inputFiles: string[] = await fileGlob.glob();
+  core.debug(`Found ${inputFiles.length} JUnit files`);
+  const suites = await JUNIT_LOADER.loadFiles(inputFiles);
 
-  console.log(`Found:\n  ${files.join('\n  ')}`);
+  const projectSummary = REPORT_GENERATOR.summariseTests(context.job, suites);
 
-  // TODO iterate
+  if (uploadResults) {
+    const summaryFile = await REPORT_GENERATOR.writeReportFile(tmpDir, projectSummary);
+    const reportFile = await HTML_REPORT_GENERATOR.generateReport(tmpDir, projectSummary, suites);
 
-  const loader = new JUnitLoader();
+    const targetName = artifactName ?? `test-report-${context.job}`;
 
-  const suites = await loader.loadFiles(files);
-
-  const [summaryFile, testSummary] = await generateSummaryArtifact(tmpDir, suites);
-  await artifactClient.uploadArtifact(`test-summaries-${context.job}.json`, [summaryFile], tmpDir);
-
-  const generator = new ReportGenerator();
-
-  const reportFile = await generator.generateReport(tmpDir, suites, testSummary);
-  await artifactClient.uploadArtifact(`test-report-${context.job}.html`, [reportFile], tmpDir);
+    await uploadReports(tmpDir, [summaryFile, reportFile], targetName);
+  }
 }
 
-async function generateSummaryArtifact(
+async function uploadReports(
   tmpDir: string,
-  suites: TestSuite[],
-): Promise<[string, TestSummary]> {
-  const summarise = (acc: TestSummary, suite: TestSuite) => {
-    return {
-      duration: acc.duration + suite.durationSec,
-      passed: acc.passed + suite.succeeded,
-      failed: acc.failed + suite.errors,
-      skipped: acc.skipped + suite.skipped,
-      tests: acc.tests + suite.tests,
-    };
-  };
-
-  const testSummary = suites.reduce(summarise, {
-    duration: 0,
-    passed: 0,
-    failed: 0,
-    skipped: 0,
-    tests: 0,
-  });
-
-  const summary = {
-    name: 'TODO',
-    tests: testSummary,
-  };
-
-  const summaryFile = path.join(tmpDir, 'test-summary.json');
-  await fsPromises.writeFile(summaryFile, JSON.stringify(summary));
-
-  return [summaryFile, testSummary];
+  reports: string[],
+  artifactName: string,
+): Promise<void> {
+  const artifactClient = artifact.create();
+  await artifactClient.uploadArtifact(artifactName, reports, tmpDir);
 }
 
 run().catch((error) => {

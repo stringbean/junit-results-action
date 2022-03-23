@@ -26,7 +26,7 @@
             background-color: #f2f2f2;
         }
 
-        table.summary .suite {
+        table.projectReport.tests .suite {
             font-family: monospace;
         }
 
@@ -56,10 +56,12 @@
 </head>
 
 <body>
-<h2 id="summary">Summary</h2>
 
+<h1>Test Report: <%= projectReport.name %></h1>
 
-<table class="summary">
+<h2 id="projectReport.tests">projectReport.tests</h2>
+
+<table class="projectReport.tests">
     <thead>
     <tr>
         <th>Name</th>
@@ -74,11 +76,11 @@
     <tbody>
     <tr class="total">
         <td>TOTAL</td>
-        <td class="duration"><%= summary.duration.toFixed(2) %></td>
-        <td class="count"><%= summary.passed %></td>
-        <td class="count"><%= summary.failed %></td>
-        <td class="count"><%= summary.skipped %></td>
-        <td class="count"><%= summary.tests %></td>
+        <td class="duration"><%= projectReport.tests.duration.toFixed(2) %></td>
+        <td class="count"><%= projectReport.tests.passed %></td>
+        <td class="count"><%= projectReport.tests.failed %></td>
+        <td class="count"><%= projectReport.tests.skipped %></td>
+        <td class="count"><%= projectReport.tests.tests %></td>
     </tr>
 
     <% suites.forEach(function(suite) { %>
@@ -100,7 +102,7 @@
 
     <h3 id="suite_<%= suite.name %>"><%= suite.name %></h3>
 
-    <p><a href="#summary">Top</a></p>
+    <p><a href="#projectReport.tests">Top</a></p>
 
     <table>
         <thead>
