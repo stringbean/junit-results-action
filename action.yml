@@ -6,12 +6,12 @@ inputs:
   files:
     description: Glob pattern to match JUnit files
     required: true
-  upload-results:
-    description: If true then upload an artifact with a summary of the results
+  upload-report:
+    description: If true then upload an HTML report
     required: false
     default: 'true'
   artifact-name:
-    description: Name of the artifact to store test results in
+    description: Name of the artifact to store HTML report in
     required: false
 
 runs:

@@ -19536,18 +19536,18 @@ const REPORT_GENERATOR = new ProjectReportGenerator();
 const HTML_REPORT_GENERATOR = new HtmlReportGenerator();
 async function run() {
     const fileGlob = await glob.create(core.getInput('files', { required: true }));
-    const uploadResults = core.getBooleanInput('upload-results');
+    const uploadReport = core.getBooleanInput('upload-report');
     const artifactName = core.getInput('artifact-name');
     const tmpDir = await external_fs_.promises.mkdtemp(external_path_.join(external_os_.tmpdir(), 'junit-results-action-'));
     const inputFiles = await fileGlob.glob();
     core.debug(`Found ${inputFiles.length} JUnit files`);
     const suites = await JUNIT_LOADER.loadFiles(inputFiles);
     const projectSummary = REPORT_GENERATOR.summariseTests(github.context.job, suites);
-    if (uploadResults) {
-        const summaryFile = await REPORT_GENERATOR.writeReportFile(tmpDir, projectSummary);
+    core.setOutput('test-results', projectSummary);
+    if (uploadReport) {
         const reportFile = await HTML_REPORT_GENERATOR.generateReport(tmpDir, projectSummary, suites);
         const targetName = artifactName ? artifactName : `test-report-${github.context.job}`;
-        await uploadReports(tmpDir, [summaryFile, reportFile], targetName);
+        await uploadReports(tmpDir, [reportFile], targetName);
     }
 }
 async function uploadReports(tmpDir, reports, artifactName) {

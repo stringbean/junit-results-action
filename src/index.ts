@@ -17,7 +17,7 @@ const HTML_REPORT_GENERATOR = new HtmlReportGenerator();
 
 async function run() {
   const fileGlob: Globber = await glob.create(core.getInput('files', { required: true }));
-  const uploadResults = core.getBooleanInput('upload-results');
+  const uploadReport = core.getBooleanInput('upload-report');
   const artifactName = core.getInput('artifact-name');
 
   const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'junit-results-action-'));
@@ -28,13 +28,12 @@ async function run() {
 
   const projectSummary = REPORT_GENERATOR.summariseTests(context.job, suites);
 
-  if (uploadResults) {
-    const summaryFile = await REPORT_GENERATOR.writeReportFile(tmpDir, projectSummary);
+  core.setOutput('test-results', projectSummary);
+
+  if (uploadReport) {
     const reportFile = await HTML_REPORT_GENERATOR.generateReport(tmpDir, projectSummary, suites);
-
     const targetName = artifactName ? artifactName : `test-report-${context.job}`;
-
-    await uploadReports(tmpDir, [summaryFile, reportFile], targetName);
+    await uploadReports(tmpDir, [reportFile], targetName);
   }
 }
 
