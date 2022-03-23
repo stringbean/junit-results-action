@@ -19546,7 +19546,7 @@ async function run() {
     if (uploadResults) {
         const summaryFile = await REPORT_GENERATOR.writeReportFile(tmpDir, projectSummary);
         const reportFile = await HTML_REPORT_GENERATOR.generateReport(tmpDir, projectSummary, suites);
-        const targetName = artifactName ?? `test-report-${github.context.job}`;
+        const targetName = artifactName ? artifactName : `test-report-${github.context.job}`;
         await uploadReports(tmpDir, [summaryFile, reportFile], targetName);
     }
 }

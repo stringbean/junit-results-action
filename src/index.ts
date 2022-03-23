@@ -32,7 +32,7 @@ async function run() {
     const summaryFile = await REPORT_GENERATOR.writeReportFile(tmpDir, projectSummary);
     const reportFile = await HTML_REPORT_GENERATOR.generateReport(tmpDir, projectSummary, suites);
 
-    const targetName = artifactName ?? `test-report-${context.job}`;
+    const targetName = artifactName ? artifactName : `test-report-${context.job}`;
 
     await uploadReports(tmpDir, [summaryFile, reportFile], targetName);
   }
