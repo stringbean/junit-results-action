@@ -7,11 +7,11 @@ inputs:
     description: Glob pattern to match JUnit files
     required: true
   upload-report:
-    description: If true then upload an HTML report
+    description: If true then upload reports in HTML & JSON formats
     required: false
     default: 'true'
   artifact-name:
-    description: Name of the artifact to store HTML report in
+    description: Name of the artifact to store reports in
     required: false
 
 runs:

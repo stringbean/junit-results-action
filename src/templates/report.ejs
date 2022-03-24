@@ -3,6 +3,14 @@
     <title>JUnit Report</title>
 
     <style>
+        body {
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"
+        }
+
+        .summary-field {
+            font-weight: bold;
+        }
+
         table {
             width: 100%;
         }
@@ -49,7 +57,7 @@
             }
 
             a {
-                color: #5050ff;
+                color: #58a6ff;
             }
         }
     </style>
@@ -57,9 +65,16 @@
 
 <body>
 
-<h1>Test Report: <%= projectReport.name %></h1>
+<h1>Test Report</h1>
 
-<h2 id="projectReport.tests">projectReport.tests</h2>
+<h2 id="projectReport.tests">Summary</h2>
+
+<ul>
+    <li><span class="summary-field">Job Name:</span> <%= projectReport.name %></li>
+    <li><span class="summary-field">Start Time:</span> 2022-03-01T11:22:33</li>
+    <li><span class="summary-field">Total Duration:</span> 23mins</li>
+</ul>
+
 
 <table class="projectReport.tests">
     <thead>
