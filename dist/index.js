@@ -19463,6 +19463,28 @@ class JUnitLoader {
         const suiteResults = await Promise.all(paths.map((path) => this.loadFile(path)));
         return suiteResults.flat();
     }
+    static summariseTests(projectName, suites) {
+        const summarise = (acc, suite) => {
+            return {
+                duration: acc.duration + suite.durationSec,
+                passed: acc.passed + suite.succeeded,
+                failed: acc.failed + suite.errors,
+                skipped: acc.skipped + suite.skipped,
+                tests: acc.tests + suite.tests,
+            };
+        };
+        const testSummary = suites.reduce(summarise, {
+            duration: 0,
+            passed: 0,
+            failed: 0,
+            skipped: 0,
+            tests: 0,
+        });
+        return {
+            name: projectName,
+            tests: testSummary,
+        };
+    }
     async loadFile(path) {
         const report = await this.parser.parseXMLFile(path);
         return report.testsuites;
@@ -19490,39 +19512,6 @@ async function generateJsonReport(tmpDir, projectReport) {
     return reportFile;
 }
 
-;// CONCATENATED MODULE: ./src/ProjectReportGenerator.ts
-
-
-class ProjectReportGenerator {
-    summariseTests(projectName, suites) {
-        const summarise = (acc, suite) => {
-            return {
-                duration: acc.duration + suite.durationSec,
-                passed: acc.passed + suite.succeeded,
-                failed: acc.failed + suite.errors,
-                skipped: acc.skipped + suite.skipped,
-                tests: acc.tests + suite.tests,
-            };
-        };
-        const testSummary = suites.reduce(summarise, {
-            duration: 0,
-            passed: 0,
-            failed: 0,
-            skipped: 0,
-            tests: 0,
-        });
-        return {
-            name: projectName,
-            tests: testSummary,
-        };
-    }
-    async writeReportFile(tmpDir, report) {
-        const reportFile = external_path_.join(tmpDir, 'project-report.json');
-        await external_fs_.promises.writeFile(reportFile, JSON.stringify(report));
-        return reportFile;
-    }
-}
-
 ;// CONCATENATED MODULE: ./src/index.ts
 
 
@@ -19533,9 +19522,7 @@ class ProjectReportGenerator {
 
 
 
-
 const JUNIT_LOADER = new JUnitLoader();
-const REPORT_GENERATOR = new ProjectReportGenerator();
 async function run() {
     const fileGlob = await glob.create(core.getInput('files', { required: true }));
     const uploadReport = core.getBooleanInput('upload-report');
@@ -19544,7 +19531,7 @@ async function run() {
     const inputFiles = await fileGlob.glob();
     core.debug(`Found ${inputFiles.length} JUnit files`);
     const suites = await JUNIT_LOADER.loadFiles(inputFiles);
-    const projectSummary = REPORT_GENERATOR.summariseTests(github.context.job, suites);
+    const projectSummary = JUnitLoader.summariseTests(github.context.job, suites);
     core.setOutput('test-results', projectSummary);
     if (uploadReport) {
         const htmlReport = await generateHtmlReport(tmpDir, projectSummary, suites);

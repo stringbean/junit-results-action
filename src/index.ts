@@ -9,10 +9,8 @@ import * as os from 'os';
 import { context } from '@actions/github';
 import JUnitLoader from './JUnitLoader';
 import { generateHtmlReport, generateJsonReport } from './report-generator';
-import { ProjectReportGenerator } from './ProjectReportGenerator';
 
 const JUNIT_LOADER = new JUnitLoader();
-const REPORT_GENERATOR = new ProjectReportGenerator();
 
 async function run() {
   const fileGlob: Globber = await glob.create(core.getInput('files', { required: true }));
@@ -25,7 +23,7 @@ async function run() {
   core.debug(`Found ${inputFiles.length} JUnit files`);
   const suites = await JUNIT_LOADER.loadFiles(inputFiles);
 
-  const projectSummary = REPORT_GENERATOR.summariseTests(context.job, suites);
+  const projectSummary = JUnitLoader.summariseTests(context.job, suites);
 
   core.setOutput('test-results', projectSummary);
 
