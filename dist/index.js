@@ -19471,20 +19471,23 @@ class JUnitLoader {
 
 // EXTERNAL MODULE: ./node_modules/ejs/lib/ejs.js
 var ejs = __nccwpck_require__(8431);
-;// CONCATENATED MODULE: ./src/HtmlReportGenerator.ts
+;// CONCATENATED MODULE: ./src/report-generator.ts
 
 
 
-class HtmlReportGenerator {
-    async generateReport(tmpDir, projectReport, suites) {
-        const report = await ejs.renderFile(__nccwpck_require__.ab + "report.ejs", {
-            projectReport,
-            suites,
-        });
-        const reportFile = external_path_.join(tmpDir, 'test-report.html');
-        await external_fs_.promises.writeFile(reportFile, report);
-        return reportFile;
-    }
+async function generateHtmlReport(tmpDir, projectReport, suites) {
+    const report = await ejs.renderFile(__nccwpck_require__.ab + "report.ejs", {
+        projectReport,
+        suites,
+    });
+    const reportFile = external_path_.join(tmpDir, 'test-report.html');
+    await external_fs_.promises.writeFile(reportFile, report);
+    return reportFile;
+}
+async function generateJsonReport(tmpDir, projectReport) {
+    const reportFile = external_path_.join(tmpDir, 'project-summary.json');
+    await external_fs_.promises.writeFile(reportFile, JSON.stringify(projectReport));
+    return reportFile;
 }
 
 ;// CONCATENATED MODULE: ./src/ProjectReportGenerator.ts
@@ -19533,7 +19536,6 @@ class ProjectReportGenerator {
 
 const JUNIT_LOADER = new JUnitLoader();
 const REPORT_GENERATOR = new ProjectReportGenerator();
-const HTML_REPORT_GENERATOR = new HtmlReportGenerator();
 async function run() {
     const fileGlob = await glob.create(core.getInput('files', { required: true }));
     const uploadReport = core.getBooleanInput('upload-report');
@@ -19545,9 +19547,10 @@ async function run() {
     const projectSummary = REPORT_GENERATOR.summariseTests(github.context.job, suites);
     core.setOutput('test-results', projectSummary);
     if (uploadReport) {
-        const reportFile = await HTML_REPORT_GENERATOR.generateReport(tmpDir, projectSummary, suites);
+        const htmlReport = await generateHtmlReport(tmpDir, projectSummary, suites);
+        const jsonReport = await generateJsonReport(tmpDir, projectSummary);
         const targetName = artifactName ? artifactName : `test-report-${github.context.job}`;
-        await uploadReports(tmpDir, [reportFile], targetName);
+        await uploadReports(tmpDir, [htmlReport, jsonReport], targetName);
     }
 }
 async function uploadReports(tmpDir, reports, artifactName) {

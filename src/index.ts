@@ -8,12 +8,11 @@ import * as path from 'path';
 import * as os from 'os';
 import { context } from '@actions/github';
 import JUnitLoader from './JUnitLoader';
-import { HtmlReportGenerator } from './HtmlReportGenerator';
+import { generateHtmlReport, generateJsonReport } from './report-generator';
 import { ProjectReportGenerator } from './ProjectReportGenerator';
 
 const JUNIT_LOADER = new JUnitLoader();
 const REPORT_GENERATOR = new ProjectReportGenerator();
-const HTML_REPORT_GENERATOR = new HtmlReportGenerator();
 
 async function run() {
   const fileGlob: Globber = await glob.create(core.getInput('files', { required: true }));
@@ -31,9 +30,11 @@ async function run() {
   core.setOutput('test-results', projectSummary);
 
   if (uploadReport) {
-    const reportFile = await HTML_REPORT_GENERATOR.generateReport(tmpDir, projectSummary, suites);
+    const htmlReport = await generateHtmlReport(tmpDir, projectSummary, suites);
+    const jsonReport = await generateJsonReport(tmpDir, projectSummary);
+
     const targetName = artifactName ? artifactName : `test-report-${context.job}`;
-    await uploadReports(tmpDir, [reportFile], targetName);
+    await uploadReports(tmpDir, [htmlReport, jsonReport], targetName);
   }
 }
 

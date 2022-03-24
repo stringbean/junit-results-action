@@ -1,6 +1,6 @@
 export interface ProjectReport {
   name: string;
-  tests: TestSummary
+  tests: TestSummary;
 }
 
 export interface TestSummary {
