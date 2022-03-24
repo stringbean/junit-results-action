@@ -67,14 +67,13 @@
 
 <h1>Test Report</h1>
 
-<h2 id="projectReport.tests">Summary</h2>
+<h2 id="summary">Summary</h2>
 
 <ul>
     <li><span class="summary-field">Job Name:</span> <%= projectReport.name %></li>
-    <li><span class="summary-field">Start Time:</span> 2022-03-01T11:22:33</li>
-    <li><span class="summary-field">Total Duration:</span> 23mins</li>
+    <li><span class="summary-field">Start Time:</span> <%= formatDate(projectReport.summary.startTime, datePattern) %></li>
+    <li><span class="summary-field">Total Duration:</span> <%= formatTestDuration(projectReport.summary.duration) %></li>
 </ul>
-
 
 <table class="projectReport.tests">
     <thead>
@@ -91,11 +90,11 @@
     <tbody>
     <tr class="total">
         <td>TOTAL</td>
-        <td class="duration"><%= projectReport.tests.duration.toFixed(2) %></td>
-        <td class="count"><%= projectReport.tests.passed %></td>
-        <td class="count"><%= projectReport.tests.failed %></td>
-        <td class="count"><%= projectReport.tests.skipped %></td>
-        <td class="count"><%= projectReport.tests.tests %></td>
+        <td class="duration"><%= projectReport.summary.duration.toFixed(2) %></td>
+        <td class="count"><%= projectReport.summary.passed %></td>
+        <td class="count"><%= projectReport.summary.failed %></td>
+        <td class="count"><%= projectReport.summary.skipped %></td>
+        <td class="count"><%= projectReport.summary.tests %></td>
     </tr>
 
     <% suites.forEach(function(suite) { %>
@@ -117,7 +116,7 @@
 
     <h3 id="suite_<%= suite.name %>"><%= suite.name %></h3>
 
-    <p><a href="#projectReport.tests">Top</a></p>
+    <p><a href="#summary">Top</a></p>
 
     <table>
         <thead>

@@ -42118,10 +42118,25 @@ var ejs = __nccwpck_require__(8431);
 
 
 
+
+function formatTestDuration(s) {
+    if (s < 60) {
+        return `${s.toFixed(2)} seconds`;
+    }
+    // convert into date-fns duration
+    const duration = (0,date_fns.intervalToDuration)({
+        start: 0,
+        end: s * 1000,
+    });
+    return (0,date_fns.formatDuration)(duration);
+}
 async function generateHtmlReport(tmpDir, projectReport, suites) {
     const report = await ejs.renderFile(__nccwpck_require__.ab + "report.ejs", {
         projectReport,
         suites,
+        datePattern: 'HH:mm:ss, do MMMM, yyyy',
+        formatDate: date_fns.format,
+        formatTestDuration,
     });
     const reportFile = external_path_.join(tmpDir, 'test-report.html');
     await external_fs_.promises.writeFile(reportFile, report);
