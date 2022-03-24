@@ -1,5 +1,6 @@
 import Parser, { TestSuite } from 'junitxml-to-javascript';
-import { ProjectReport, TestSummary } from './TestSummary';
+import { TestSummary } from './model/TestSummary';
+import { ProjectReport } from './model/ProjectReport';
 
 export default class JUnitLoader {
   private readonly parser: Parser;

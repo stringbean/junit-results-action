@@ -1,8 +1,8 @@
 import * as ejs from 'ejs';
 import { promises as fsPromises } from 'fs';
 import * as path from 'path';
-import { ProjectReport } from './TestSummary';
 import { TestSuite } from 'junitxml-to-javascript';
+import { ProjectReport } from './model/ProjectReport';
 
 export async function generateHtmlReport(
   tmpDir: string,
