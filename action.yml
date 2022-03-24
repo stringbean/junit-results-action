@@ -13,6 +13,9 @@ inputs:
   artifact-name:
     description: Name of the artifact to store reports in
     required: false
+  retention-days:
+    description: Number of days to retain report artifact for
+    required: false
 
 runs:
   using: node16

@@ -42159,10 +42159,17 @@ async function generateJsonReport(tmpDir, projectReport) {
 
 
 const JUNIT_LOADER = new JUnitLoader();
+function getNumberInput(key) {
+    const raw = core.getInput(key);
+    if (raw) {
+        return parseInt(raw, 10);
+    }
+}
 async function run() {
     const fileGlob = await glob.create(core.getInput('files', { required: true }));
     const uploadReport = core.getBooleanInput('upload-report');
     const artifactName = core.getInput('artifact-name');
+    const retentionDays = getNumberInput('retention-days');
     const tmpDir = await external_fs_.promises.mkdtemp(external_path_.join(external_os_.tmpdir(), 'junit-results-action-'));
     const inputFiles = await fileGlob.glob();
     core.debug(`Found ${inputFiles.length} JUnit files`);
@@ -42173,12 +42180,12 @@ async function run() {
         const htmlReport = await generateHtmlReport(tmpDir, projectSummary, suites);
         const jsonReport = await generateJsonReport(tmpDir, projectSummary);
         const targetName = artifactName ? artifactName : `test-report-${github.context.job}`;
-        await uploadReports(tmpDir, [htmlReport, jsonReport], targetName);
+        await uploadReports(tmpDir, [htmlReport, jsonReport], targetName, retentionDays);
     }
 }
-async function uploadReports(tmpDir, reports, artifactName) {
+async function uploadReports(tmpDir, reports, artifactName, retentionDays) {
     const artifactClient = artifact_client/* create */.U();
-    await artifactClient.uploadArtifact(artifactName, reports, tmpDir);
+    await artifactClient.uploadArtifact(artifactName, reports, tmpDir, { retentionDays });
 }
 run().catch((error) => {
     core.error('Unexpected error while processing JUnit results');

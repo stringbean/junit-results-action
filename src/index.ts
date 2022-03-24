@@ -12,10 +12,19 @@ import { generateHtmlReport, generateJsonReport } from './report-generator';
 
 const JUNIT_LOADER = new JUnitLoader();
 
+function getNumberInput(key: string): number | undefined {
+  const raw = core.getInput(key);
+
+  if (raw) {
+    return parseInt(raw, 10);
+  }
+}
+
 async function run() {
   const fileGlob: Globber = await glob.create(core.getInput('files', { required: true }));
   const uploadReport = core.getBooleanInput('upload-report');
   const artifactName = core.getInput('artifact-name');
+  const retentionDays = getNumberInput('retention-days');
 
   const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'junit-results-action-'));
 
@@ -32,7 +41,7 @@ async function run() {
     const jsonReport = await generateJsonReport(tmpDir, projectSummary);
 
     const targetName = artifactName ? artifactName : `test-report-${context.job}`;
-    await uploadReports(tmpDir, [htmlReport, jsonReport], targetName);
+    await uploadReports(tmpDir, [htmlReport, jsonReport], targetName, retentionDays);
   }
 }
 
@@ -40,9 +49,10 @@ async function uploadReports(
   tmpDir: string,
   reports: string[],
   artifactName: string,
+  retentionDays: number | null,
 ): Promise<void> {
   const artifactClient = artifact.create();
-  await artifactClient.uploadArtifact(artifactName, reports, tmpDir);
+  await artifactClient.uploadArtifact(artifactName, reports, tmpDir, { retentionDays });
 }
 
 run().catch((error) => {
